@@ -141,6 +141,23 @@ test("hosted quiz synchronizes players, validates answers, and reveals scores", 
   assert.equal(hostReveal.players.find((player) => player.name === "Guest").score, 0);
   assert.equal(guestReveal.question.explanation, hostReveal.question.explanation);
 
+  for (let questionNumber = 2; questionNumber <= QUESTIONS_PER_GAME; questionNumber += 1) {
+    const nextQuestion = waitForState(host, (state) => state.phase === "question" && state.questionNumber === questionNumber);
+    const hostNextReveal = waitForState(host, (state) => state.phase === "reveal" && state.questionNumber === questionNumber);
+    const guestNextReveal = waitForState(guest, (state) => state.phase === "reveal" && state.questionNumber === questionNumber);
+    const questionState = await nextQuestion;
+    const answer = QUESTIONS.find((question) => question.id === questionState.question.id).correctIndex;
+    host.emit("game:answer", answer);
+    guest.emit("game:answer", (answer + 1) % 4);
+    await Promise.all([hostNextReveal, guestNextReveal]);
+  }
+
+  const hostResults = waitForState(host, (state) => state.phase === "results");
+  const guestResults = waitForState(guest, (state) => state.phase === "results");
+  const [finalHostState, finalGuestState] = await Promise.all([hostResults, guestResults]);
+  assert.equal(finalHostState.questionNumber, QUESTIONS_PER_GAME);
+  assert.equal(finalGuestState.phase, "results");
+
   const soloLobby = waitForState(host, (state) => state.phase === "lobby");
   host.emit("room:create", { name: "Solo" });
   await soloLobby;

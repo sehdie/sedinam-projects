@@ -39,7 +39,7 @@ npm run dev
 
 The repository includes a Render Blueprint in [`render.yaml`](./render.yaml). In Render, choose **New → Blueprint**, connect `sehdie/study-hall`, and review the three services before applying the Blueprint.
 
-Study Hall and Quiz Arena use free web services and keep active room state in memory; free services may sleep while idle. Collaborative Kanban uses a 1 GB persistent disk so tasks survive restarts, which requires Render's paid Starter web-service tier. Review Render's current pricing and the Blueprint preview before confirming deployment.
+All three services use Render's free web-service plan. Free services may sleep while idle. Study Hall and Quiz Arena keep room state in memory; Kanban stores tasks in its local JSON file, which is ephemeral on Render and may reset after a restart or redeploy. Use sample data only unless you connect durable storage.
 
 See each project README for deployment-specific behavior and limitations.
 

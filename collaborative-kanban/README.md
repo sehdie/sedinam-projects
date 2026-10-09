@@ -27,4 +27,4 @@ The demo has no authentication or per-board authorization. Add authentication an
 
 ## Deploy
 
-Collaborative Kanban is included in the repository's Render Blueprint. It stores JSON data at `/var/data/boards.json` on a 1 GB persistent disk, so its Render service must use the paid Starter tier; do not switch it to an ephemeral free instance if you need tasks to survive restarts.
+Collaborative Kanban is included in the repository's Render Blueprint on the free web-service plan. Its JSON file is stored on ephemeral service storage and may reset after a restart or redeploy. Use sample data only until you connect a durable database or paid persistent disk.

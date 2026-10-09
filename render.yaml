@@ -26,17 +26,11 @@ services:
   - type: web
     name: collaborative-kanban
     runtime: node
-    plan: starter
+    plan: free
     rootDir: collaborative-kanban
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
-    disk:
-      name: kanban-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
-      - key: BOARD_DATA_PATH
-        value: /var/data/boards.json

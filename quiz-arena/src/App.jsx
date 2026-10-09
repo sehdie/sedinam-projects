@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import {
+  ArrowLeft,
   ArrowRight,
   Award,
   Check,

@@ -2,6 +2,8 @@
 
 A shared product board for tracking tasks from to-do through completion, with live presence and Socket.IO updates.
 
+**Live demo:** [collaborative-kanban-vgza.onrender.com](https://collaborative-kanban-vgza.onrender.com)
+
 ## Features
 
 - Create, edit, and delete tasks with assignee, due date, priority, description, and labels.

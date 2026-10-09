@@ -2,6 +2,8 @@
 
 A live trivia room for friends: create a room, share its four-character code, and play timed rounds together. A solo player can compete against QuizBot.
 
+**Live demo:** [quiz-arena-lx99.onrender.com](https://quiz-arena-lx99.onrender.com)
+
 ## Features
 
 - Live lobby and player roster over Socket.IO.

@@ -2,6 +2,8 @@
 
 A realtime study room where people can see who is online, send live messages, and share a Pomodoro timer.
 
+**Live demo:** [study-hall-2rs4.onrender.com](https://study-hall-2rs4.onrender.com)
+
 ## Features
 
 - Room-code-based join flow and live presence.

@@ -6,11 +6,11 @@ I build clear, responsive interfaces and the real-time systems behind them. My w
 
 ## Selected Projects
 
-| Project | What it is | What it demonstrates |
-| --- | --- | --- |
-| [Study Hall](./src/App.jsx) | A shared study room with live presence, chat, and a synchronized Pomodoro timer. | React, Express, Socket.IO, real-time state |
-| [Quiz Arena](./quiz-arena/) | A multiplayer trivia room with timed rounds, scoring, a leaderboard, and solo play against QuizBot. | Server-authoritative gameplay, WebSockets, React state |
-| [Collaborative Kanban](./collaborative-kanban/) | A live task board with drag-and-drop, task editing, filters, and persistent updates. | Express, Socket.IO, validation, persistence, responsive UI |
+| Project | Live demo | What it is | What it demonstrates |
+| --- | --- | --- | --- |
+| [Study Hall](./src/App.jsx) | [Open](https://study-hall-2rs4.onrender.com) | A shared study room with live presence, chat, and a synchronized Pomodoro timer. | React, Express, Socket.IO, real-time state |
+| [Quiz Arena](./quiz-arena/) | [Open](https://quiz-arena-lx99.onrender.com) | A multiplayer trivia room with timed rounds, scoring, a leaderboard, and solo play against QuizBot. | Server-authoritative gameplay, WebSockets, React state |
+| [Collaborative Kanban](./collaborative-kanban/) | [Open](https://collaborative-kanban-vgza.onrender.com) | A live task board with drag-and-drop, task editing, filters, and synchronized updates. | Express, Socket.IO, validation, persistence, responsive UI |
 
 ## Run Locally
 

@@ -235,12 +235,12 @@ export default function App() {
           )}
 
           {isResults && (
-            <div className="results-view">
+            <div className="results-view" role="status" aria-live="polite">
               <div className="results-confetti confetti-one" /><div className="results-confetti confetti-two" /><div className="results-confetti confetti-three" />
               <span className="results-eyebrow"><Trophy size={15} /> THE FINAL TALLY</span>
               <div className="winner-medal"><Award size={33} /></div>
-              <h1>{room.players[0]?.id === currentPlayer?.id ? "That's your victory." : `${room.players[0]?.name || "No one"} takes the crown.`}</h1>
-              <p className="results-subtitle">Eight questions down. Here's how the room stacked up.</p>
+              <h1>{currentPlayer?.id === room.players[0]?.id ? "You took the crown." : currentPlayer ? `Good game, ${currentPlayer.name}.` : "Round results"}</h1>
+              <p className="results-subtitle">{currentPlayer ? `You finished #${ownRank} with ${currentPlayer.score.toLocaleString()} points.` : "Eight questions down. Here's how the room stacked up."}</p>
               <div className="final-podium">{room.players.slice(0, 3).map((player, index) => <div className={`podium-person podium-${index + 1}`} key={player.id} style={{ "--player-accent": getAvatarColor(player.name) }}><span className="podium-rank">{index + 1 === 1 ? <Crown size={16} /> : `0${index + 1}`}</span><span className="podium-avatar">{player.name.slice(0, 1).toUpperCase()}</span><strong>{player.name}</strong><span className="podium-score">{player.score.toLocaleString()} <small>PTS</small></span></div>)}</div>
               <div className="personal-result"><span>YOUR FINISH</span><strong>#{ownRank}</strong><span>{currentPlayer?.score.toLocaleString() || 0} points earned</span></div>
               <button className="back-to-lobby" type="button" onClick={leaveRoom}><ArrowLeft size={16} /> Back to room setup</button>

@@ -157,6 +157,8 @@ test("hosted quiz synchronizes players, validates answers, and reveals scores", 
   const [finalHostState, finalGuestState] = await Promise.all([hostResults, guestResults]);
   assert.equal(finalHostState.questionNumber, QUESTIONS_PER_GAME);
   assert.equal(finalGuestState.phase, "results");
+  assert.equal(finalGuestState.players.find((player) => player.name === "Guest").score, 0);
+  assert.equal(finalGuestState.players.find((player) => player.name === "Host").score > 0, true);
 
   const soloLobby = waitForState(host, (state) => state.phase === "lobby");
   host.emit("room:create", { name: "Solo" });

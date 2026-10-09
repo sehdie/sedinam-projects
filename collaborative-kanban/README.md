@@ -23,4 +23,8 @@ Open the Vite URL printed in the terminal. Run `npm test` for the two-client per
 
 ## Notes
 
-The demo has no authentication or per-board authorization. Its JSON data file is ignored by Git and stored under `server/data/`; the file system must be persistent if deployed. Add authentication, access controls, and a managed database before using it with private or important data.
+The demo has no authentication or per-board authorization. Add authentication and access controls before using it with private or important data.
+
+## Deploy
+
+Collaborative Kanban is included in the repository's Render Blueprint. It stores JSON data at `/var/data/boards.json` on a 1 GB persistent disk, so its Render service must use the paid Starter tier; do not switch it to an ephemeral free instance if you need tasks to survive restarts.

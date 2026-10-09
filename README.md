@@ -35,7 +35,13 @@ npm install
 npm run dev
 ```
 
-See each project README for its tests, build commands, and current limitations. These projects are not publicly deployed yet; local dev URLs are not public demos.
+## Deploy
+
+The repository includes a Render Blueprint in [`render.yaml`](./render.yaml). In Render, choose **New → Blueprint**, connect `sehdie/study-hall`, and review the three services before applying the Blueprint.
+
+Study Hall and Quiz Arena use free web services and keep active room state in memory; free services may sleep while idle. Collaborative Kanban uses a 1 GB persistent disk so tasks survive restarts, which requires Render's paid Starter web-service tier. Review Render's current pricing and the Blueprint preview before confirming deployment.
+
+See each project README for deployment-specific behavior and limitations.
 
 ## About
 

@@ -29,3 +29,7 @@ npm run build
 ## Notes
 
 Rooms and scores are in memory and reset when the room empties or the server restarts. Display names are not authenticated. This is a portfolio/demo project, not a ranked or production quiz service.
+
+## Deploy
+
+Quiz Arena is included in the repository's Render Blueprint. Deploy from the repository root to create its Node web service; the service builds the Vite app and serves it alongside Socket.IO.

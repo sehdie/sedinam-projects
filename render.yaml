@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: study-hall
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  - type: web
+    name: quiz-arena
+    runtime: node
+    plan: free
+    rootDir: quiz-arena
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  - type: web
+    name: collaborative-kanban
+    runtime: node
+    plan: starter
+    rootDir: collaborative-kanban
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: kanban-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BOARD_DATA_PATH
+        value: /var/data/boards.json

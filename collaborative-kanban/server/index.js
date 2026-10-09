@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: process.env.CLIENT_ORIGIN || "http://localhost:5175" },
+  cors: { origin: process.env.CLIENT_ORIGIN || process.env.RENDER_EXTERNAL_URL || "http://localhost:5175" },
 });
 
 const PORT = Number(process.env.PORT) || 3003;
@@ -146,6 +146,12 @@ function updateTask(socket, taskId, patch) {
 
 app.get("/api/health", (_request, response) => response.json({ status: "ok", tasks: tasks.length }));
 app.get("/api/board", (_request, response) => response.json(publicBoard()));
+
+const frontendDist = path.resolve(__dirname, "../dist");
+if (existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get("*", (_request, response) => response.sendFile(path.join(frontendDist, "index.html")));
+}
 
 io.on("connection", (socket) => {
   socket.on("board:join", (payload = {}) => {

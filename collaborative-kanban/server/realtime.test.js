@@ -90,6 +90,10 @@ test("task changes persist and synchronize across connected clients", async (con
   }
   assert.equal(healthy, true, `server should start and serve health checks (${healthDetail}; ${childExit})${serverOutput ? `: ${serverOutput}` : ""}`);
 
+  const frontendResponse = await fetch(`http://127.0.0.1:${port}/`);
+  assert.equal(frontendResponse.ok, true, "server should serve the built frontend");
+  assert.match(await frontendResponse.text(), /<div id="root"><\/div>/);
+
   const firstConnected = new Promise((resolve, reject) => {
     first.once("connect", resolve);
     first.once("connect_error", reject);

@@ -38,7 +38,14 @@ test("hosted quiz synchronizes players, validates answers, and reveals scores", 
   let serverOutput = "";
   let childExit = "still running";
   const child = spawn(process.execPath, [serverPath], {
-    env: { ...process.env, PORT: String(port) },
+    env: {
+      ...process.env,
+      PORT: String(port),
+      QUIZ_QUESTION_SECONDS: "3",
+      QUIZ_REVEAL_SECONDS: "1",
+      QUIZ_BOT_THINK_MIN_MS: "50",
+      QUIZ_BOT_THINK_VARIANCE_MS: "1",
+    },
     stdio: ["ignore", "pipe", "pipe"],
   });
   child.stdout.setEncoding("utf8");
@@ -123,4 +130,22 @@ test("hosted quiz synchronizes players, validates answers, and reveals scores", 
   const soloResult = await soloReveal;
   assert.equal(soloResult.players.find((player) => player.name === "Solo").score > 0, true);
   assert.equal(soloResult.players.find((player) => player.isBot).answered, true);
+
+  const seenQuestionIds = new Set([soloStarted.question.id]);
+  for (let questionNumber = 2; questionNumber <= QUESTIONS.length; questionNumber += 1) {
+    const nextQuestion = waitForState(host, (state) => state.phase === "question" && state.questionNumber === questionNumber);
+    const nextReveal = waitForState(host, (state) => state.phase === "reveal" && state.questionNumber === questionNumber);
+    const questionState = await nextQuestion;
+    assert.equal(seenQuestionIds.has(questionState.question.id), false, "a game should not repeat questions");
+    seenQuestionIds.add(questionState.question.id);
+    const answer = QUESTIONS.find((question) => question.id === questionState.question.id).correctIndex;
+    host.emit("game:answer", answer);
+    const reveal = await nextReveal;
+    assert.equal(reveal.players.find((player) => player.isBot).answered, true);
+  }
+
+  const results = await waitForState(host, (state) => state.phase === "results", 5000);
+  assert.equal(results.questionNumber, QUESTIONS.length);
+  assert.equal(results.questionTotal, QUESTIONS.length);
+  assert.equal(seenQuestionIds.size, QUESTIONS.length);
 });

@@ -15,11 +15,11 @@ const io = new Server(httpServer, {
 });
 
 const PORT = Number(process.env.PORT) || 3002;
-const QUESTION_SECONDS = 20;
-const REVEAL_SECONDS = 5;
+const QUESTION_SECONDS = Number(process.env.QUIZ_QUESTION_SECONDS) || 20;
+const REVEAL_SECONDS = Number(process.env.QUIZ_REVEAL_SECONDS) || 5;
 const MAX_PLAYERS = 12;
-const BOT_THINK_MIN_MS = 1800;
-const BOT_THINK_VARIANCE_MS = 1200;
+const BOT_THINK_MIN_MS = Number(process.env.QUIZ_BOT_THINK_MIN_MS) || 1800;
+const BOT_THINK_VARIANCE_MS = Number(process.env.QUIZ_BOT_THINK_VARIANCE_MS) || 1200;
 const rooms = new Map();
 
 function cleanName(value) {
@@ -36,6 +36,15 @@ function normalizeRoomCode(value) {
 
 function createRoomCode() {
   return randomBytes(2).toString("hex").toUpperCase();
+}
+
+function shuffledQuestions() {
+  const questions = [...QUESTIONS];
+  for (let index = questions.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [questions[index], questions[swapIndex]] = [questions[swapIndex], questions[index]];
+  }
+  return questions;
 }
 
 function getSafeQuestion(room) {
@@ -166,7 +175,7 @@ function answerForBot(room, now) {
 }
 
 function startGame(room) {
-  room.questions = [...QUESTIONS];
+  room.questions = shuffledQuestions();
   room.questionIndex = 0;
   room.answers.clear();
   for (const player of room.players.values()) {

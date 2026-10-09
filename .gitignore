@@ -4,3 +4,5 @@ dist/
 .env.*
 !.env.example
 npm-debug.log*
+quiz-arena/server/data/question-history.json
+quiz-arena/server/data/question-history.json.tmp

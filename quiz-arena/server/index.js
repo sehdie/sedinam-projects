@@ -5,7 +5,8 @@ import { fileURLToPath } from "node:url";
 import express from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
-import { QUESTIONS } from "./questions.js";
+import { createQuestionDeck } from "./question-deck.js";
+import { QUESTIONS, QUESTIONS_PER_GAME } from "./questions.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -20,6 +21,10 @@ const REVEAL_SECONDS = Number(process.env.QUIZ_REVEAL_SECONDS) || 5;
 const MAX_PLAYERS = 12;
 const BOT_THINK_MIN_MS = Number(process.env.QUIZ_BOT_THINK_MIN_MS) || 1800;
 const BOT_THINK_VARIANCE_MS = Number(process.env.QUIZ_BOT_THINK_VARIANCE_MS) || 1200;
+const questionDeck = createQuestionDeck(
+  QUESTIONS,
+  process.env.QUIZ_HISTORY_PATH || path.join(__dirname, "data", "question-history.json"),
+);
 const rooms = new Map();
 
 function cleanName(value) {
@@ -175,7 +180,7 @@ function answerForBot(room, now) {
 }
 
 function startGame(room) {
-  room.questions = shuffledQuestions();
+  room.questions = questionDeck.draw(QUESTIONS_PER_GAME);
   room.questionIndex = 0;
   room.answers.clear();
   for (const player of room.players.values()) {

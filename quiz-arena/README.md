@@ -7,7 +7,7 @@ A live trivia room for friends: create a room, share its four-character code, an
 ## Features
 
 - Live lobby and player roster over Socket.IO.
-- Eight server-selected questions with a 20-second answer window.
+- Eight random questions per session from a 40-question bank, without repeats until the bank is exhausted.
 - Correct answers score more when submitted quickly; the server validates and scores answers.
 - Answer keys stay hidden until the reveal phase.
 - QuizBot joins as a server-managed competitor in solo mode.
@@ -30,7 +30,7 @@ npm run build
 
 ## Notes
 
-Rooms and scores are in memory and reset when the room empties or the server restarts. Display names are not authenticated. This is a portfolio/demo project, not a ranked or production quiz service.
+Rooms and scores are in memory and reset when the room empties or the server restarts. Used-question history is saved in `server/data/question-history.json` and prevents repeats across sessions until the bank cycles. Render's free filesystem is ephemeral, so a service restart there resets this history. Display names are not authenticated. This is a portfolio/demo project, not a ranked or production quiz service.
 
 ## Deploy
 

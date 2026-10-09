@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import { mkdtemp, rm } from "node:fs/promises";
 import { once as onceEvent } from "node:events";
 import { createServer as createTcpServer } from "node:net";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { io } from "socket.io-client";
-import { QUESTIONS } from "./questions.js";
+import { QUESTIONS, QUESTIONS_PER_GAME } from "./questions.js";
 
 function waitForState(socket, predicate = () => true, timeoutMs = 5000) {
   return new Promise((resolve, reject) => {
@@ -13,13 +16,21 @@ function waitForState(socket, predicate = () => true, timeoutMs = 5000) {
       if (!predicate(state)) return;
       clearTimeout(timer);
       socket.off("room:state", onState);
+      socket.off("room:error", onError);
       resolve(state);
+    };
+    const onError = (message) => {
+      clearTimeout(timer);
+      socket.off("room:state", onState);
+      reject(new Error(`Room rejected the action: ${message}`));
     };
     const timer = setTimeout(() => {
       socket.off("room:state", onState);
-      reject(new Error("Timed out waiting for room state"));
+      socket.off("room:error", onError);
+      reject(new Error(`Timed out waiting for room state: ${predicate.toString()}`));
     }, timeoutMs);
     socket.on("room:state", onState);
+    socket.once("room:error", onError);
   });
 }
 
@@ -34,6 +45,8 @@ async function reservePort() {
 
 test("hosted quiz synchronizes players, validates answers, and reveals scores", async (context) => {
   const port = await reservePort();
+  const historyDirectory = await mkdtemp(path.join(tmpdir(), "quiz-arena-history-"));
+  const historyPath = path.join(historyDirectory, "used-questions.json");
   const serverPath = fileURLToPath(new URL("./index.js", import.meta.url));
   let serverOutput = "";
   let childExit = "still running";
@@ -45,6 +58,7 @@ test("hosted quiz synchronizes players, validates answers, and reveals scores", 
       QUIZ_REVEAL_SECONDS: "1",
       QUIZ_BOT_THINK_MIN_MS: "50",
       QUIZ_BOT_THINK_VARIANCE_MS: "1",
+      QUIZ_HISTORY_PATH: historyPath,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -55,10 +69,18 @@ test("hosted quiz synchronizes players, validates answers, and reveals scores", 
   child.on("exit", (code, signal) => { childExit = `exit ${code}, signal ${signal}`; });
   const host = io(`http://localhost:${port}`, { autoConnect: false, timeout: 3000 });
   const guest = io(`http://localhost:${port}`, { autoConnect: false, timeout: 3000 });
-  context.after(() => {
+  const guestStates = [];
+  const guestErrors = [];
+  let guestDisconnectReason = null;
+  guest.on("room:state", (state) => guestStates.push({ phase: state.phase, players: state.players.length, roomCode: state.roomCode }));
+  guest.on("room:error", (message) => guestErrors.push(message));
+  guest.on("disconnect", (reason) => { guestDisconnectReason = reason; });
+  context.after(async () => {
     host.disconnect();
     guest.disconnect();
     child.kill();
+    if (child.exitCode === null) await onceEvent(child, "exit");
+    await rm(historyDirectory, { recursive: true, force: true });
   });
 
   let healthy = false;
@@ -95,7 +117,11 @@ test("hosted quiz synchronizes players, validates answers, and reveals scores", 
 
   const guestLobby = waitForState(guest, (state) => state.phase === "lobby" && state.players.length === 2);
   guest.emit("room:join", { name: "Guest", roomCode: createdRoom.roomCode });
-  await guestLobby;
+  try {
+    await guestLobby;
+  } catch (error) {
+    throw new Error(`${error.message}; connected=${guest.connected}; disconnect=${guestDisconnectReason}; states=${JSON.stringify(guestStates)}; errors=${JSON.stringify(guestErrors)}; child=${childExit}; server=${serverOutput}; room=${createdRoom.roomCode}`);
+  }
 
   const hostQuestion = waitForState(host, (state) => state.phase === "question");
   const guestQuestion = waitForState(guest, (state) => state.phase === "question");
@@ -132,7 +158,8 @@ test("hosted quiz synchronizes players, validates answers, and reveals scores", 
   assert.equal(soloResult.players.find((player) => player.isBot).answered, true);
 
   const seenQuestionIds = new Set([soloStarted.question.id]);
-  for (let questionNumber = 2; questionNumber <= QUESTIONS.length; questionNumber += 1) {
+  assert.equal(seenQuestionIds.has(hostStarted.question.id), false, "a question from the prior session should not repeat");
+  for (let questionNumber = 2; questionNumber <= QUESTIONS_PER_GAME; questionNumber += 1) {
     const nextQuestion = waitForState(host, (state) => state.phase === "question" && state.questionNumber === questionNumber);
     const nextReveal = waitForState(host, (state) => state.phase === "reveal" && state.questionNumber === questionNumber);
     const questionState = await nextQuestion;
@@ -145,7 +172,7 @@ test("hosted quiz synchronizes players, validates answers, and reveals scores", 
   }
 
   const results = await waitForState(host, (state) => state.phase === "results", 5000);
-  assert.equal(results.questionNumber, QUESTIONS.length);
-  assert.equal(results.questionTotal, QUESTIONS.length);
-  assert.equal(seenQuestionIds.size, QUESTIONS.length);
+  assert.equal(results.questionNumber, QUESTIONS_PER_GAME);
+  assert.equal(results.questionTotal, QUESTIONS_PER_GAME);
+  assert.equal(seenQuestionIds.size, QUESTIONS_PER_GAME);
 });
